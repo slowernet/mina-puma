@@ -3,6 +3,8 @@
 [Mina](https://github.com/nadarei/mina) tasks for handle with
 [Puma](https://github.com/puma/puma).
 
+This gem is framework-agnostic and works with any Rack-based application (Rails, Sinatra, etc.).
+
 This gem provides several mina tasks:
 
     mina puma:phased_restart  # Restart puma (using phased restart)

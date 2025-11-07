@@ -1,11 +1,10 @@
 require 'mina/bundler'
-require 'mina/rails'
 
 namespace :puma do
   set :web_server, :puma
 
   set :puma_role,      -> { fetch(:user) }
-  set :puma_env,       -> { fetch(:rails_env, 'production') }
+  set :puma_env,       -> { fetch(:rack_env, 'production') }
   set :puma_config,    -> { "#{fetch(:shared_path)}/config/puma.rb" }
   set :puma_socket,    -> { "#{fetch(:shared_path)}/tmp/sockets/puma.sock" }
   set :puma_state,     -> { "#{fetch(:shared_path)}/tmp/sockets/puma.state" }
@@ -27,9 +26,9 @@ namespace :puma do
         echo 'Puma is already running!';
       else
         if [ -e "#{fetch(:puma_config)}" ]; then
-          cd #{fetch(:puma_root_path)} && #{fetch(:puma_cmd)} -q -d -e #{fetch(:puma_env)} -C #{fetch(:puma_config)}
+          cd #{fetch(:puma_root_path)} && #{fetch(:puma_cmd)} -q -e #{fetch(:puma_env)} -C #{fetch(:puma_config)}
         else
-          cd #{fetch(:puma_root_path)} && #{fetch(:puma_cmd)} -q -d -e #{fetch(:puma_env)} -b "unix://#{fetch(:puma_socket)}" #{puma_port_option} -S #{fetch(:puma_state)} --pidfile #{fetch(:puma_pid)} --control 'unix://#{fetch(:pumactl_socket)}' --redirect-stdout "#{fetch(:puma_stdout)}" --redirect-stderr "#{fetch(:puma_stderr)}"
+          cd #{fetch(:puma_root_path)} && #{fetch(:puma_cmd)} -q -e #{fetch(:puma_env)} -b "unix://#{fetch(:puma_socket)}" #{puma_port_option} -S #{fetch(:puma_state)} --pidfile #{fetch(:puma_pid)} --control-url 'unix://#{fetch(:pumactl_socket)}' --redirect-stdout "#{fetch(:puma_stdout)}" --redirect-stderr "#{fetch(:puma_stderr)}"
         fi
       fi
     ]
@@ -73,7 +72,7 @@ namespace :puma do
         if [ -e "#{fetch(:puma_config)}" ]; then
           cd #{fetch(:puma_root_path)} && #{fetch(:pumactl_cmd)} -F #{fetch(:puma_config)} #{command}
         else
-          cd #{fetch(:puma_root_path)} && #{fetch(:pumactl_cmd)} -S #{fetch(:puma_state)} -C "unix://#{fetch(:pumactl_socket)}" --pidfile #{fetch(:puma_pid)} #{command}
+          cd #{fetch(:puma_root_path)} && #{fetch(:pumactl_cmd)} -S #{fetch(:puma_state)} --control-url "unix://#{fetch(:pumactl_socket)}" --pidfile #{fetch(:puma_pid)} #{command}
         fi
       else
         echo 'Puma is not running!';
